@@ -19,3 +19,9 @@
 ## Tips
 * Make sure your app id has the 'HealthKit' entitlement when this plugin is installed.
 * Also, make sure your app and AppStore description complies with these Apple review guidelines: https://developer.apple.com/app-store/review/guidelines/#healthkit
+
+
+## Development
+
+* `grunt jshint` to check the javascript
+

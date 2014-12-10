@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="com.telerik.plugins.healthkit"
+        id="com.countit.cordova.healthkit"
         version="0.1.0">
 
   <name>HealthKit</name>
@@ -8,15 +8,17 @@
   <description>
     Interact with the iOS8 HealthKit SDK
   </description>
-
   <license>MIT</license>
+  <repo>https://github.com/socialworkout/HealthKit.git</repo>
+  <issue>https://github.com/socialworkout/HealthKit/issues</issue>
+
 
   <engines>
-    <engine name="cordova" version=">=3.0.0"/>
+    <engine name="cordova" version=">=4.1.2"/>
   </engines>
 
-  <js-module src="www/HealthKit.js" name="HealthKit">
-    <clobbers target="window.plugins.healthkit" />
+  <js-module src="www/health_kit.js" name="HealthKit">
+    <clobbers target="countit.healthkit" />
   </js-module>
 
   <!-- ios -->
