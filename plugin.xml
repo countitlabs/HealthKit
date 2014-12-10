@@ -14,7 +14,7 @@
 
 
   <engines>
-    <engine name="cordova" version=">=4.1.2"/>
+    <engine name="cordova" version=">=3.6.4"/>
   </engines>
 
   <js-module src="www/health_kit.js" name="HealthKit">
