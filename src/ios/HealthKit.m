@@ -4,22 +4,28 @@
 
 @implementation HealthKit
 
+- (void)pluginInitialize {
+    NSLog(@"XXX - pluginInitialize");
+}
+
 - (CDVPlugin*) initWithWebView:(UIWebView*)theWebView {
   self = (HealthKit*)[super initWithWebView:theWebView];
   if (self) {
     _healthStore = [HKHealthStore new];
   }
+  NSLog(@"XXX - HealthKit.initWithWebView completes");
   return self;
 }
 
 - (void) available:(CDVInvokedUrlCommand*)command {
+  NSLog(@"XXX - HealthKit.available called");
   CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[HKHealthStore isHealthDataAvailable]];
   [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
 - (void) requestAuthorization:(CDVInvokedUrlCommand*)command {
   NSMutableDictionary *args = [command.arguments objectAtIndex:0];
-  
+
   // read types
   NSArray *readTypes = [args objectForKey:@"readTypes"];
   NSSet *readDataTypes = [[NSSet alloc] init];
@@ -75,11 +81,11 @@
 
   NSString *activityType = [args objectForKey:@"activityType"];
   NSString *quantityType = [args objectForKey:@"quantityType"]; // TODO verify this value
-  
+
   // TODO check validity of this enum
   //  HKWorkoutActivityType activityTypeEnum = HKWorkoutActivityTypeCycling;
   HKWorkoutActivityType activityTypeEnum = (HKWorkoutActivityType) activityType;
-  
+
 
   // optional energy
   NSNumber *energy = [args objectForKey:@"energy"];
@@ -94,7 +100,7 @@
     }
     nrOfEnergyUnits = [HKQuantity quantityWithUnit:preferredEnergyUnit doubleValue:energy.doubleValue];
   }
-  
+
   // optional distance
   NSNumber *distance = [args objectForKey:@"distance"];
   NSString *distanceUnit = [args objectForKey:@"distanceUnit"];
@@ -156,7 +162,7 @@
                                                                       startDate:startDate
                                                                         endDate:endDate];
             NSArray *samples = [NSArray arrayWithObjects:sampleActivity, sampleCalories, nil];
-          
+
             [self.healthStore addSamples:samples toWorkout:workout completion:^(BOOL success, NSError *mostInnerError) {
               if (success) {
                 dispatch_sync(dispatch_get_main_queue(), ^{
@@ -209,7 +215,7 @@
 
         [finalResults addObject:entry];
       }
-      
+
       dispatch_sync(dispatch_get_main_queue(), ^{
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:finalResults];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
@@ -225,13 +231,13 @@
 
   NSDate *start = [NSDate date]; // TODO pass in
   NSDate *end = [NSDate date]; // TODO pass in
-  
+
   // TODO pass in workoutactivity
   HKWorkout *workout = [HKWorkout workoutWithActivityType:HKWorkoutActivityTypeRunning
                                                 startDate:start
                                                   endDate:end];
   NSArray *samples = [NSArray init];
-  
+
   [self.healthStore addSamples:samples toWorkout:workout completion:^(BOOL success, NSError *error) {
     if (success) {
       dispatch_sync(dispatch_get_main_queue(), ^{
@@ -260,7 +266,7 @@
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     return;
   }
-  
+
   HKUnit *preferredUnit = [self getUnit:unit:@"HKMassUnit"];
   if (preferredUnit == nil) {
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"invalid unit was passed"];
@@ -300,7 +306,7 @@
 - (void) readWeight:(CDVInvokedUrlCommand*)command {
   NSMutableDictionary *args = [command.arguments objectAtIndex:0];
   NSString *unit = [args objectForKey:@"unit"];
-  
+
   HKUnit *preferredUnit = [self getUnit:unit:@"HKMassUnit"];
   if (preferredUnit == nil) {
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"invalid unit was passed"];
@@ -350,21 +356,21 @@
   NSString *unit = [args objectForKey:@"unit"];
   NSNumber *amount = [args objectForKey:@"amount"];
   NSDate *date = [NSDate dateWithTimeIntervalSince1970:[[args objectForKey:@"date"] doubleValue]];
-  
-  
+
+
   if (amount == nil) {
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"no amount was set"];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     return;
   }
-  
+
   HKUnit *preferredUnit = [self getUnit:unit:@"HKLengthUnit"];
   if (preferredUnit == nil) {
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"invalid unit was passed"];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     return;
   }
-  
+
   HKQuantityType *heightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
   NSSet *requestTypes = [NSSet setWithObjects: heightType, nil];
   [self.healthStore requestAuthorizationToShareTypes:requestTypes readTypes:requestTypes completion:^(BOOL success, NSError *error) {
@@ -397,14 +403,14 @@
 - (void) readHeight:(CDVInvokedUrlCommand*)command {
   NSMutableDictionary *args = [command.arguments objectAtIndex:0];
   NSString *unit = [args objectForKey:@"unit"];
-  
+
   HKUnit *preferredUnit = [self getUnit:unit:@"HKLengthUnit"];
   if (preferredUnit == nil) {
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"invalid unit was passed"];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     return;
   }
-  
+
   // Query to get the user's latest height, if it exists.
   HKQuantityType *heightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
   NSSet *requestTypes = [NSSet setWithObjects: heightType, nil];
@@ -525,7 +531,7 @@
 - (NSSet *)dataTypesToWrite {
   HKQuantityType *dietaryCalorieEnergyType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDietaryEnergyConsumed];
   HKQuantityType *activeEnergyBurnType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
- 
+
   return [NSSet setWithObjects:dietaryCalorieEnergyType, activeEnergyBurnType, heightType, weightType, nil];
 }
 
@@ -533,7 +539,7 @@
 - (NSSet *)dataTypesToRead {
   HKQuantityType *dietaryCalorieEnergyType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDietaryEnergyConsumed];
   HKQuantityType *activeEnergyBurnType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
- 
+
   return [NSSet setWithObjects:dietaryCalorieEnergyType, activeEnergyBurnType, heightType, weightType, birthdayType, biologicalSexType, nil];
 }
 */
